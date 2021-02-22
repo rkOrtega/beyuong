@@ -1,29 +1,106 @@
-# Back-End Test
+# Instalação
 
-Clone este projeto e mande um .zip com o resultado final.
+1. Copiar environment
 
-## O que fazer?
+```sh
+cp .env.example .env
+```
 
-1. API REST para criar pedido
-2. Salvar as informações em algum banco de dados (relacional ou não-relacional).
+2. Build docker
 
-| Campo | Descrição
-|---|---|
-| nome  | Obrigatório. Nome do cliente |
-| email  | Obrigatório. Validar formato do e-mail |
-| cpf  | Obrigatório. Validar formato do CPF |
-| cep  | Obrigatório. Validar formato do CEP |
-| frete  | Obrigatório. Valor do frete |
-| valor  | Obrigatório. Valor total do pedido |
-| itens  | Obrigatório. Array |
-| itens.sku  | Obrigatório. SKU do produto |
-| itens.descricao  | Obrigatório. Descrição do produto |
-| itens.valor  | Obrigatório. Valor do produto |
-| itens.quantidade  | Obrigatório. Quantidade do produto |
+```sh
+docker-compose up --build
+```
 
+3. Instalar dependências
 
-## Requisitos
-1. O teste pode ser feito usando qualquer linguagem ou framework
-2. É necessário ter um passo a passo de como fazer pra rodar o teste, se possível deixar como um docker
+```sh
+docker-compose exec api composer install
+```
 
-Boa sorte!
+4. Executar Migrations
+
+```sh
+docker exec api php artisan migrate
+```
+
+# Acessar o banco de dados
+
+```sh
+docker exec -it db cli
+```
+
+# Teste
+
+Rota para cadastrar o pedido:
+POST: 127.0.0.1/pedido
+BODY EXEMPLO:
+
+```json
+{
+  "cliente": {
+    "nome": "João da Neves",
+    "email": "joaozinho@hotmail.com",
+    "cpf": "99000000000",
+    "cep": "00000000"
+  },
+  "frete": "100.00",
+  "itens": [
+    {
+      "sku": "MTC-6110",
+      "descricao": "Um treco",
+      "valor": "100.00",
+      "quantidade": "1"
+    },
+    {
+      "sku": "MTC-6111",
+      "descricao": "Outro treco",
+      "valor": "50.00",
+      "quantidade": "2"
+    }
+  ]
+}
+```
+
+Rota para ver o pedido cadastrado (trocar <ID_PEDIDO> pelo id do pedido cadastrado)
+GET: 127.0.0.1/pedido/<ID_PEDIDO>
+
+Na raiz do projeto tem a pasta postman, com o arquivo .json que pode ser inportado no postman para testar as rotas
+
+# Testar via curl
+
+1. Cadastrar pedido
+
+```sh
+curl --location --request POST '127.0.0.1/pedido' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "cliente": {
+        "nome": "João da Neves",
+        "email": "joaozinho@hotmail.com",
+        "cpf": "99000000000",
+        "cep": "00000000"
+    },
+    "frete": "100.00",
+    "itens": [
+        {
+            "sku": "MTC-6110",
+            "descricao": "Um treco",
+            "valor": "100.00",
+            "quantidade": "1"
+        },
+        {
+            "sku": "MTC-6111",
+            "descricao": "Outro treco",
+            "valor": "50.00",
+            "quantidade": "2"
+        }
+    ]
+}'
+```
+
+2. Consultar pedido
+
+```sh
+curl --location --request GET '127.0.0.1/pedido/1'
+```
